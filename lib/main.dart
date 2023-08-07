@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
 
     return ChangeNotifierProvider(
+      
       create: (context) => MyAppState(),
       child: MaterialApp(
         title: 'Namer App',
@@ -29,14 +30,201 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 
-    // ↓ Add this.
+  //Seguinte function
   void getNext() {
     current = WordPair.random();
     notifyListeners();
   }
+
+  var favorites = <WordPair>[];
+
+  void toggleFavorite() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+    } else {
+      favorites.add(current);
+    }
+    notifyListeners();
+  }
+
+
 }
 
-class MyHomePage extends StatelessWidget {
+/* class MyHomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var pair = appState.current;
+
+    IconData icon;
+      if (appState.favorites.contains(pair)) {
+        icon = Icons.favorite;
+      } else {
+        icon = Icons.favorite_border;
+      }
+
+
+    return Scaffold(
+      
+      body: Center( // Wrap the Column with a Center widget
+        child: Column
+        (
+          mainAxisAlignment: MainAxisAlignment.center, //horizontal align
+          children: [
+            Text('A random idea in my app:'),
+            BigCard(pair: pair),
+            SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+        
+              //default
+              children: [
+
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavorite();
+                  },
+                  icon: Icon(icon),
+                  label: Text('Default'),
+                ),
+                SizedBox(width: 10),
+
+
+              //seguinte
+              ElevatedButton(
+                
+                onPressed: () {
+                  print('botão pressionado debug console.log');
+                  appState.getNext();
+                },
+                child: Text('Seguinte'),
+              ),
+              SizedBox(width: 10), // Add spacing between the buttons
+
+
+              ElevatedButton(
+                  onPressed: () {
+                    // Handle favorite button press here
+                    // For example, you can add the current pair to a list of favorites.
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 55, 38, 37), // Set the button color to red
+                    //shape: CircleBorder(), // Make the button circular
+                    padding: EdgeInsets.all(8), // Adjust padding as needed
+                    
+                  ),
+                    child: SizedBox(
+                  
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.favorite),
+                          SizedBox(width: 4), // Add spacing between the icon and text
+                          Text(
+                            'Gosto',
+                            style: TextStyle(
+                              color: Colors.white, // Set the text color to white
+                            ),
+                          ),
+                          ],
+                        ),
+              
+                  )
+                  
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+ */
+  
+
+  
+  class MyHomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Row(
+        children: [
+          SafeArea(
+            child: NavigationRail(
+              extended: false,
+              destinations: [
+                NavigationRailDestination(
+                  icon: Icon(Icons.home),
+                  label: Text('Home'),
+                ),
+                NavigationRailDestination(
+                  icon: Icon(Icons.favorite),
+                  label: Text('Favorites'),
+                ),
+              ],
+              selectedIndex: 0,
+              onDestinationSelected: (value) {
+                print('selected: $value');
+              },
+            ),
+          ),
+          Expanded(
+            child: Container(
+              color: Theme.of(context).colorScheme.primaryContainer,
+              child: GeneratorPage(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class GeneratorPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var pair = appState.current;
+
+    IconData icon;
+    if (appState.favorites.contains(pair)) {
+      icon = Icons.favorite;
+    } else {
+      icon = Icons.favorite_border;
+    }
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          BigCard(pair: pair),
+          SizedBox(height: 10),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton.icon(
+                onPressed: () {
+                  appState.toggleFavorite();
+                },
+                icon: Icon(icon),
+                label: Text('Like'),
+              ),
+              SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  appState.getNext();
+                },
+                child: Text('Next'),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+  
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
@@ -44,24 +232,29 @@ class MyHomePage extends StatelessWidget {
 
     return Scaffold(
       body: Column(
-        mainAxisAlignment: MainAxisAlignment.center, // Aligns the children vertically centered
-        crossAxisAlignment: CrossAxisAlignment.center, // Center horizontally
+
         children: [
           Text('A random idea in my app:'),
           BigCard(pair: pair),
-           ElevatedButton(
-              onPressed: () {
-                print('botão pressionado debug console.log');
-                appState.getNext();
-              },
-              child: Text('Seguinte'),
-            ),
+          SizedBox(height: 10),
+           Row(
+              mainAxisSize: MainAxisSize.min,  
+              children: [
+                ElevatedButton(
+                    onPressed: () {
+                      print('botão pressionado debug console.log');
+                      appState.getNext();
+                    },
+                    child: Text('Seguinte'),
+                  ),
+             ],
+           ),
         ],
       ),
      
     );
   }
-}
+
 
 class BigCard extends StatelessWidget {
   const BigCard({
