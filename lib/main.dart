@@ -6,6 +6,8 @@ void main() {
   runApp(MyApp());
 }
 
+
+//MyApp  STATELESS WIDGET----------------------------------------------
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -20,6 +22,14 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+          navigationRailTheme: NavigationRailThemeData(
+            selectedIconTheme: IconThemeData(size: 30.0), // Adjust the icon size
+            selectedLabelTextStyle: TextStyle(
+              fontSize: 16.0, // Adjust the font size
+              color: Colors.black, // Change the text color to black
+            ),
+            
+          ),
         ),
         home: MyHomePage(),
       ),
@@ -27,6 +37,7 @@ class MyApp extends StatelessWidget {
   }
 }
 
+//MyAppState CHANGE NOTIFIER ----------------------------------------------
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 
@@ -46,141 +57,87 @@ class MyAppState extends ChangeNotifier {
     }
     notifyListeners();
   }
-
-
 }
 
-/* class MyHomePage extends StatelessWidget {
+
+//MyHomePage STATEFUL WIDGET ----------------------------------------------
+  class MyHomePage extends StatefulWidget {
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+//_MyHomePageState extends MyHomePage-----------------
+class _MyHomePageState extends State<MyHomePage> {
+
+  var selectedIndex = 0; 
+
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-      if (appState.favorites.contains(pair)) {
-        icon = Icons.favorite;
-      } else {
-        icon = Icons.favorite_border;
+    Widget page;
+      switch (selectedIndex) {
+        case 0:
+          page = GeneratorPage();
+          break;
+        case 1:
+          page = Placeholder(); //placeholder marks a cross to dev 
+          break;
+        default:
+          throw UnimplementedError('no widget for $selectedIndex');
       }
-
-
-    return Scaffold(
-      
-      body: Center( // Wrap the Column with a Center widget
-        child: Column
-        (
-          mainAxisAlignment: MainAxisAlignment.center, //horizontal align
-          children: [
-            Text('A random idea in my app:'),
-            BigCard(pair: pair),
-            SizedBox(height: 10),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-        
-              //default
-              children: [
-
-                ElevatedButton.icon(
-                  onPressed: () {
-                    appState.toggleFavorite();
-                  },
-                  icon: Icon(icon),
-                  label: Text('Default'),
-                ),
-                SizedBox(width: 10),
-
-
-              //seguinte
-              ElevatedButton(
-                
-                onPressed: () {
-                  print('botão pressionado debug console.log');
-                  appState.getNext();
-                },
-                child: Text('Seguinte'),
-              ),
-              SizedBox(width: 10), // Add spacing between the buttons
-
-
-              ElevatedButton(
-                  onPressed: () {
-                    // Handle favorite button press here
-                    // For example, you can add the current pair to a list of favorites.
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 55, 38, 37), // Set the button color to red
-                    //shape: CircleBorder(), // Make the button circular
-                    padding: EdgeInsets.all(8), // Adjust padding as needed
+    //SCAFFOLD --------------
+    return LayoutBuilder(
+      builder: (context, constraints) { //constriains here for horizontal expand auto
+        return Scaffold(
+          //ROW -------------
+          body: Row(
+            //2 children here --------------
+            children: [
+              //children SafeArea --side nav
+              SafeArea(
+                child: NavigationRail(
+                  extended: constraints.maxWidth >= 600, //auto expand when horizontal, extended was false before
+                  minWidth: 72, // Set your desired minimum width here
+                  destinations: [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Home'),
                     
-                  ),
-                    child: SizedBox(
-                  
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.favorite),
-                          SizedBox(width: 4), // Add spacing between the icon and text
-                          Text(
-                            'Gosto',
-                            style: TextStyle(
-                              color: Colors.white, // Set the text color to white
-                            ),
-                          ),
-                          ],
-                        ),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite),
+                      label: Text('Favorites'),
+                    ),
+                    
+                     
+                  ],
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      selectedIndex = value;
+                    });
+                  },
+                ),
+                
+              ),
               
-                  )
-                  
+              //children Expanded
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  // child: GeneratorPage(),
+                  child: page,
                 ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
- */
-  
-
-  
-  class MyHomePage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          SafeArea(
-            child: NavigationRail(
-              extended: false,
-              destinations: [
-                NavigationRailDestination(
-                  icon: Icon(Icons.home),
-                  label: Text('Home'),
-                ),
-                NavigationRailDestination(
-                  icon: Icon(Icons.favorite),
-                  label: Text('Favorites'),
-                ),
-              ],
-              selectedIndex: 0,
-              onDestinationSelected: (value) {
-                print('selected: $value');
-              },
-            ),
+              ),
+              
+              
+            ],
           ),
-          Expanded(
-            child: Container(
-              color: Theme.of(context).colorScheme.primaryContainer,
-              child: GeneratorPage(),
-            ),
-          ),
-        ],
-      ),
+        );
+      }
     );
   }
 }
 
+//GeneratorPage STATELESS WIDGET----------------------------------------------
 class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -256,6 +213,7 @@ class GeneratorPage extends StatelessWidget {
   }
 
 
+//BigCard STATELESS WIDGET----------------------------------------------
 class BigCard extends StatelessWidget {
   const BigCard({
     super.key,
