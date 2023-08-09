@@ -7,10 +7,12 @@ void main() {
 }
 
 
-//MyApp  STATELESS WIDGET----------------------------------------------
+//MyApp  STATELESS WIDGET---------------------------------------------- theme, home:MyHomePage
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
+  //build the widget ******************/
   @override
   Widget build(BuildContext context) {
 
@@ -70,6 +72,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   var selectedIndex = 0; 
 
+
+
+  //build the widget ******************/
   @override
   Widget build(BuildContext context) {
     Widget page;
@@ -78,6 +83,12 @@ class _MyHomePageState extends State<MyHomePage> {
           page = GeneratorPage();
           break;
         case 1:
+          page = FavoritesPage(); 
+          break;
+        case 2:
+          page = FavoritesPageTutorial(); 
+          break;
+        case 3:
           page = Placeholder(); //placeholder marks a cross to dev 
           break;
         default:
@@ -93,9 +104,11 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               //children SafeArea --side nav
               SafeArea(
+                        // ----- child here -------//
                 child: NavigationRail(
                   extended: constraints.maxWidth >= 600, //auto expand when horizontal, extended was false before
-                  minWidth: 72, // Set your desired minimum width here
+                  minWidth: 72,
+                   // Side menu nav here
                   destinations: [
                     NavigationRailDestination(
                       icon: Icon(Icons.home),
@@ -105,6 +118,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     NavigationRailDestination(
                       icon: Icon(Icons.favorite),
                       label: Text('Favorites'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.favorite),
+                      label: Text('Favorites'),
+                    ),
+                    
+                    NavigationRailDestination(
+                      icon: Icon(Icons.yard),
+                      label: Text('Yard'),
                     ),
                     
                      
@@ -121,6 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
               
               //children Expanded
               Expanded(
+                        // ----- child here -------//
                 child: Container(
                   color: Theme.of(context).colorScheme.primaryContainer,
                   // child: GeneratorPage(),
@@ -139,6 +162,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
 //GeneratorPage STATELESS WIDGET----------------------------------------------
 class GeneratorPage extends StatelessWidget {
+
+  //build the widget ******************/
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
@@ -154,11 +179,13 @@ class GeneratorPage extends StatelessWidget {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+                // ----- child here -------//
         children: [
           BigCard(pair: pair),
           SizedBox(height: 10),
           Row(
             mainAxisSize: MainAxisSize.min,
+                    // ----- child here -------//
             children: [
               ElevatedButton.icon(
                 onPressed: () {
@@ -172,6 +199,7 @@ class GeneratorPage extends StatelessWidget {
                 onPressed: () {
                   appState.getNext();
                 },
+                        // ----- child here -------//
                 child: Text('Next'),
               ),
             ],
@@ -182,6 +210,8 @@ class GeneratorPage extends StatelessWidget {
   }
 }
   
+
+  //build the widget ******************/
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
@@ -189,13 +219,14 @@ class GeneratorPage extends StatelessWidget {
 
     return Scaffold(
       body: Column(
-
+        // ----- child here -------//
         children: [
           Text('A random idea in my app:'),
           BigCard(pair: pair),
           SizedBox(height: 10),
            Row(
               mainAxisSize: MainAxisSize.min,  
+              // ----- child here -------//
               children: [
                 ElevatedButton(
                     onPressed: () {
@@ -222,6 +253,7 @@ class BigCard extends StatelessWidget {
 
   final WordPair pair;
 
+  //build the widget ******************/
   @override
   Widget build(BuildContext context) {
     
@@ -232,10 +264,86 @@ class BigCard extends StatelessWidget {
 
     return Card(
       color: theme.colorScheme.primary,
+      // ----- child here -------//
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Text(pair.asLowerCase, style: style),
       ),
     );
+  }
+}
+
+
+//FavoritesPage STATELESS WIDGET----------------------------------------------
+class FavoritesPage extends StatelessWidget {
+
+  //build the widget ******************/
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var favorites = appState.favorites;
+
+    if (appState.favorites.isEmpty) {
+          return Center(
+            child: Text('No favorites yet.'),
+          );
+        }
+
+    return Center(
+        // ----- child here -------//
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('Favorites'),
+                // ----- child here -------//
+          Expanded(
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: favorites.length,
+              itemBuilder: (context, index) {
+                return ListTile(
+                  title: Text(favorites[index].asLowerCase),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+
+//FavoritesPage STATELESS WIDGET----------------------------------------------
+class FavoritesPageTutorial extends StatelessWidget {
+
+  //build the widget ******************/
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    var favorites = appState.favorites;
+
+    if (appState.favorites.isEmpty) {
+          return Center(
+            child: Text('No favorites yet.'),
+          );
+        }
+
+     return ListView(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Text('You have '
+              '${appState.favorites.length} favorites:'),
+        ),
+        for (var pair in appState.favorites)
+          ListTile(
+            leading: Icon(Icons.favorite),
+            title: Text(pair.asLowerCase),
+          ),
+      ],
+    );
+    
   }
 }
