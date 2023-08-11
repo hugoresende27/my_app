@@ -1,7 +1,9 @@
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-
+import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 void main() {
   runApp(MyApp());
 }
@@ -89,6 +91,9 @@ class _MyHomePageState extends State<MyHomePage> {
           page = FavoritesPageTutorial(); 
           break;
         case 3:
+          page = CountryNameWidget(); //placeholder marks a cross to dev 
+          break;
+        case 4:
           page = Placeholder(); //placeholder marks a cross to dev 
           break;
         default:
@@ -112,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   destinations: [
                     NavigationRailDestination(
                       icon: Icon(Icons.home),
-                      label: Text('Home'),
+                      label: Text('Generator'),
                     
                     ),
                     NavigationRailDestination(
@@ -120,14 +125,21 @@ class _MyHomePageState extends State<MyHomePage> {
                       label: Text('Favorites'),
                     ),
                     NavigationRailDestination(
-                      icon: Icon(Icons.favorite),
+                      icon: Icon(Icons.face),
                       label: Text('Favorites'),
+                    ),
+
+                    NavigationRailDestination(
+                      icon: Icon(Icons.photo_album),
+                      label: Text('Album'),
                     ),
                     
                     NavigationRailDestination(
                       icon: Icon(Icons.yard),
                       label: Text('Yard'),
                     ),
+
+          
                     
                      
                   ],
@@ -345,5 +357,68 @@ class FavoritesPageTutorial extends StatelessWidget {
       ],
     );
     
+  }
+}
+
+class Country {
+  final String common;
+
+  Country({required this.common});
+
+  factory Country.fromJson(Map<String, dynamic> json) {
+    return Country(
+      common: json['name']['common'],
+    );
+  }
+}
+
+Future<Country> fetchCountry() async {
+  final response = await http.get(Uri.parse('https://restcountries.com/v3.1/independent?status=true'));
+
+  if (response.statusCode == 200) {
+    final dynamic jsonResponse = json.decode(response.body);
+
+    // Parse the country name
+    final country = Country.fromJson(jsonResponse);
+    
+    return country;
+  } else {
+    throw Exception('Failed to load country');
+  }
+}
+
+class CountryNameWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    late Future<Country> futureCountry;
+    futureCountry = fetchCountry();
+
+    return MaterialApp(
+      title: 'Country Name Example',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Country Name Example'),
+        ),
+        body: Center(
+          child: FutureBuilder<Country>(
+            future: futureCountry,
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                // Display the country name
+                return Text(snapshot.data!.common);
+              } else if (snapshot.hasError) {
+                return Text('${snapshot.error}');
+              }
+
+              // By default, show a loading spinner.
+              return const CircularProgressIndicator();
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
